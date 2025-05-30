@@ -7,7 +7,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-#Extract text and chunk using —— separator
+# Extract text and chunk using —— separator
 def pdf_to_doc(pdf_path, document_name, document_type):
     doc = fitz.open(pdf_path)
     full_text = ""
@@ -32,7 +32,7 @@ def pdf_to_doc(pdf_path, document_name, document_type):
         )
     return documents
 
-#Store documents in Chroma DB
+# Store documents in Chroma DB
 def store_in_chroma(pdf_path, document_name, document_type, persist_directory="./chroma_phi"):
     vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding_model)
     data = vectordb.get()
@@ -47,7 +47,7 @@ def store_in_chroma(pdf_path, document_name, document_type, persist_directory=".
     vectordb.add_documents(docs)
     print(f"✅ Stored {len(docs)} chunks from '{document_name}' as '{document_type}'.")
 
-#Read a single Document
+# Read a single Document
 def view_document(document_name, persist_directory="./chroma_phi"):
     vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding_model)
     docs = vectordb.get(where={"document_name": document_name})
@@ -59,7 +59,7 @@ def view_document(document_name, persist_directory="./chroma_phi"):
     for i, chunk in enumerate(chunks):
         print(f"[Section {i+1}]\n{chunk}\n{'-'*50}")
 
-#List all the documents in the DB
+# List all the documents in the DB
 def list_documents(persist_directory="./chroma_phi"):
     if not os.path.exists(persist_directory):
         print("⚠️ No Chroma database found.")
@@ -80,7 +80,7 @@ def list_documents(persist_directory="./chroma_phi"):
             print(f"• Name: {name} | Type: {dtype}")
             seen.add((name, dtype))
 
-#Delete all entries by document name
+# Delete all entries by document name
 def delete_entries_by_name(document_name, persist_directory="./chroma_phi"):
     vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding_model)
     data = vectordb.get()
@@ -95,13 +95,13 @@ def delete_entries_by_name(document_name, persist_directory="./chroma_phi"):
         print(f"⚠️ No entries found with document_name = '{document_name}'.")
 
 
-#Update entries by re-uploading document
+# Update entries by re-uploading document
 def update_entries(pdf_path, document_name, document_type, persist_directory="./chroma_phi"):
     delete_entries_by_name(document_name, persist_directory)
     store_in_chroma(pdf_path, document_name, document_type, persist_directory)
     print(f"🔁 Updated entries for '{document_name}'.")
 
-#Clear the DB
+# Clear the DB
 def clear_database(persist_directory="./chroma_phi"):
     vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding_model)
     data = vectordb.get()
@@ -112,4 +112,3 @@ def clear_database(persist_directory="./chroma_phi"):
     # Delete all documents
     vectordb.delete(ids=all_ids)
     print(f"🧹 Cleared {len(all_ids)} documents from the vector DB at '{persist_directory}'.")
-
